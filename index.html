@@ -813,38 +813,161 @@ async function downloadAsImage() {
     const orderPaper =
         document.getElementById("orderPaper");
 
+
+    const order =
+        JSON.parse(
+            localStorage.getItem("fertilizerOrder")
+        );
+
+
+    if (!order) {
+
+        alert("Order information not found.");
+
+        return;
+
+    }
+
+
     try {
 
-        const canvas = await html2canvas(orderPaper, {
-            scale: 2,
-            backgroundColor: "#ffffff",
-            useCORS: true
-        });
+        // ==========================================
+        // STEP 1
+        // CREATE IMAGE
+        // ==========================================
 
-        const image =
+        const canvas =
+            await html2canvas(
+                orderPaper,
+                {
+                    scale: 2,
+                    backgroundColor: "#ffffff",
+                    useCORS: true
+                }
+            );
+
+
+        // Convert image to Base64
+        const imageData =
             canvas.toDataURL("image/png");
+
+
+        // ==========================================
+        // STEP 2
+        // CREATE FILE NAME
+        // ==========================================
+
+        const fileName =
+            order.number + ".png";
+
+
+        // ==========================================
+        // STEP 3
+        // YOUR GOOGLE APPS SCRIPT URL
+        // ==========================================
+
+        const GOOGLE_SCRIPT_URL =
+            "https://script.google.com/macros/s/AKfycbzrnZ30YFP3M_rIgzhDvs8fAyk-Cekc4QDLtex_Agk8o8wqP6eUyPDt3gC5kCYQLuy8/exec";
+
+
+        // ==========================================
+        // STEP 4
+        // UPLOAD TO GOOGLE DRIVE
+        // ==========================================
+
+        const response =
+            await fetch(
+                GOOGLE_SCRIPT_URL,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body: JSON.stringify({
+
+                        fileName:
+                            fileName,
+
+                        image:
+                            imageData
+
+                    })
+                }
+            );
+
+
+        // Get response
+        const result =
+            await response.json();
+
+
+        // ==========================================
+        // STEP 5
+        // DOWNLOAD TO FARMER DEVICE
+        // ==========================================
 
         const link =
             document.createElement("a");
 
-        const order =
-            JSON.parse(localStorage.getItem("fertilizerOrder"));
 
         link.download =
-            (order ? order.number : "fertilizer-order") + ".png";
+            fileName;
 
-        link.href = image;
+
+        link.href =
+            imageData;
+
+
+        document.body.appendChild(link);
+
 
         link.click();
 
+
+        document.body.removeChild(link);
+
+
+        // ==========================================
+        // STEP 6
+        // SHOW MESSAGE
+        // ==========================================
+
+        if (result.success) {
+
+            alert(
+                "Order uploaded successfully!\n\n" +
+                "The order has been sent to the admin."
+            );
+
+        } else {
+
+            alert(
+                "Image downloaded, but upload failed."
+            );
+
+            console.error(result);
+
+        }
+
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Upload error:",
+            error
+        );
+
 
         alert(
-            "Could not create the image. Please try the normal Print button."
+            "Upload failed.\n\n" +
+            "Please check your internet connection and try again."
         );
+
     }
+
 }
 
 
