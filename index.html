@@ -862,39 +862,20 @@ function newOrder() {
         document.getElementById(key).value = 0;
     });
 
+    // Clear saved data
     localStorage.removeItem("fertilizerOrder");
+    localStorage.removeItem("farmerName");
+    localStorage.removeItem("mobile");
+    localStorage.removeItem("village");
 
-    showPage(2);
+    // Clear login fields
+    document.getElementById("farmerName").value = "";
+    document.getElementById("mobile").value = "";
+    document.getElementById("village").value = "";
+
+    // Go to login
+    showPage(1);
 }
-
-
-/* =====================================================
-   LOAD SAVED FARMER INFORMATION
-===================================================== */
-
-window.addEventListener("load", function() {
-
-    const farmerName =
-        localStorage.getItem("farmerName");
-
-    const mobile =
-        localStorage.getItem("mobile");
-
-    const village =
-        localStorage.getItem("village");
-
-    if (farmerName && mobile && village) {
-
-        document.getElementById("farmerName").value =
-            farmerName;
-
-        document.getElementById("mobile").value =
-            mobile;
-
-        document.getElementById("village").value =
-            village;
-    }
-});
 </script>
 
 </body>
